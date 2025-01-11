@@ -1,0 +1,11 @@
+kind: Pod                              # Defines the resource type as a Pod.
+apiVersion: v1                         # Specifies the API version used for the Pod.
+metadata:                              # Contains metadata for the Pod.
+  name: annotations                    # Names the Pod as "annotations."
+  annotations:                         # Adds non-identifying metadata to the Pod.
+    imageregistry: "https://hub.docker.com/"  # Docker registry URL for container images.
+    buildURL: "https://jenkins.joindevops.com/expense/backend/build/67"  # CI/CD build URL for tracking.
+spec:                                  # Defines the desired configuration of the Pod.
+  containers:                          # Lists containers that will run in the Pod.
+  - name: nginx                        # Specifies the name of the container as "nginx."
+    image: nginx                       # Uses the official "nginx" image for the container.
