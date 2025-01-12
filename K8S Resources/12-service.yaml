@@ -1,5 +1,19 @@
 # Service - a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
 
+kind: Pod                      # Specifies that the resource type is a Pod
+apiVersion: v1                 # Indicates the API version for the Pod resource
+metadata:                      # Provides metadata about the Pod
+  name: labels                 # Assigns the name "labels" to the Pod
+  labels:                      # Adds labels to the Pod for organization and selection
+    project: expense           # Label identifying the project as "expense"
+    module: backend            # Label identifying the module as "backend"
+    environment: dev           # Label identifying the environment as "dev"
+spec:                          # Specifies the Pod's configuration
+  containers:                  # Defines the list of containers for this Pod
+  - name: nginx                # Assigns the name "nginx" to the container
+    image: nginx               # Specifies the container image as "nginx" (default tag is "latest")
+  
+---
 kind: Service                     # Defines the resource type as Service
 apiVersion: v1                    # Specifies the API version (v1) for the Service resource
 metadata:                         # Metadata information about the Service
