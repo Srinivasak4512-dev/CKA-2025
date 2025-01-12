@@ -3,7 +3,7 @@
 kind: Pod                      # Specifies that the resource type is a Pod
 apiVersion: v1                 # Indicates the API version for the Pod resource
 metadata:                      # Provides metadata about the Pod
-  name: Nginx                 # Assigns the name "labels" to the Pod
+  name: nginx                 # Assigns the name "labels" to the Pod
   labels:                      # Adds labels to the Pod for organization and selection
     project: expense           # Label identifying the project as "expense"
     module: backend            # Label identifying the module as "backend"
