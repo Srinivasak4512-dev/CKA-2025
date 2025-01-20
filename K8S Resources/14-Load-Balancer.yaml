@@ -1,0 +1,19 @@
+
+# Loadbalancer - The LoadBalancer Service type is used to expose an application to the internet by creating an external load balancer through the cloud provider's infrastructure (e.g., AWS, Azure, GCP). 
+#It automatically assigns a public IP address to your application and provides load balancing across all the Pods backing the Service.
+
+kind: Service                     # Defines the resource type as Service
+apiVersion: v1                    # Specifies the API version (v1) for the Service resource
+metadata:                         # Metadata information about the Service
+  name: nginx-lb                  # Sets the name of the Service to "nginx-lb"
+spec:                             # Details the specifications for the Service
+  type: LoadBalancer              # Defines the Service type as LoadBalancer for external access
+  selector:                       # Defines the label selector to match Pods for this Service
+    project: expense              # Matches Pods with the label "project: expense"
+    module: backend               # Matches Pods with the label "module: backend"
+    environment: dev              # Matches Pods with the label "environment: dev"
+  ports:                          # Specifies the list of ports exposed by the Service
+  - name: nginx-svc-port          # Names the port for easy reference as "nginx-svc-port"
+    protocol: TCP                 # Uses TCP as the protocol for communication
+    port: 80                      # Sets the Service's external port to 80
+    targetPort: 80                # Directs traffic to port 80 on the container running inside the matched Pods
