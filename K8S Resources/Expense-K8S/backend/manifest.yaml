@@ -1,0 +1,92 @@
+apiVersion: v1 # Defines the API version for the ConfigMap resource
+kind: ConfigMap # The type of Kubernetes resource, here it's a ConfigMap
+metadata:
+  name: backend # Name of the ConfigMap
+  namespace: expense # Namespace in which the ConfigMap is created
+data:
+  DB_HOST: mysql # Data field containing the MySQL database host
+
+---
+apiVersion: apps/v1 # Defines the API version for the Deployment resource
+kind: Deployment # The type of Kubernetes resource, here it's a Deployment
+metadata:
+  name: backend # Name of the Deployment
+  namespace: expense # Namespace in which the Deployment is created
+  labels:
+    app: backend # Label to identify the backend application
+    tier: api # Label indicating this is the API tier
+    project: expense # Label to associate the Deployment with the 'expense' project
+spec:
+  replicas: 2 # Desired number of replicas (Pods) for the Deployment
+  selector:
+    matchLabels:
+      app: backend # Selector to match Pods with the label 'app: backend'
+      tier: api # Selector to match Pods with the label 'tier: api'
+      project: expense # Selector to match Pods with the label 'project: expense'
+  template:
+    metadata:
+      labels:
+        app: backend # Labels applied to the Pods
+        tier: api # Labels applied to the Pods
+        project: expense # Labels applied to the Pods
+    spec:
+      initContainers: # Initialization containers, run before the main container starts
+      - name: mysql-check # Name of the init container
+        image: busybox:1.28 # Docker image used for the init container
+        command: ['sh', '-c', "until nslookup mysql; do echo waiting for myservice; sleep 2; done"] # Command to wait until MySQL is resolvable
+      containers:
+      - name: backend # Name of the main container
+        image: joindevops/backend:v1 # Docker image used for the container
+        resources: # Resource requests and limits for the container
+          requests:
+            cpu: 100m # Requested CPU resources
+            memory: 128Mi # Requested memory resources
+          limits:
+            cpu: 100m # Limit for CPU resources
+            memory: 128Mi # Limit for memory resources
+        envFrom:
+        - configMapRef: # Referencing the 'backend' ConfigMap for environment variables
+            name: backend
+        readinessProbe: # Readiness probe to check if the container is ready
+          tcpSocket:
+            port: 8080 # Port on which the probe checks the container
+          initialDelaySeconds: 15 # Delay before the first readiness check
+          periodSeconds: 10 # Time interval between subsequent readiness checks
+        livenessProbe: # Liveness probe to check if the container is alive
+          httpGet:
+            path: /health # Path for the HTTP GET request
+            port: 8080 # Port on which the probe checks the container
+          initialDelaySeconds: 3 # Delay before the first liveness check
+          periodSeconds: 3 # Time interval between subsequent liveness checks
+
+---
+kind: Service # Defines a Service resource to expose the Backend Deployment
+apiVersion: v1 # API version for the Service resource
+metadata:
+  name: backend # Name of the Service
+  namespace: expense # Namespace in which the Service is created
+spec:
+  selector:
+    app: backend # Selector to match Pods with the label 'app: backend'
+    tier: api # Selector to match Pods with the label 'tier: api'
+    project: expense # Selector to match Pods with the label 'project: expense'
+  ports:
+  - name: backend-port # Name of the service port
+    protocol: TCP # Protocol used for communication (TCP for backend)
+    port: 8080 # Port exposed by the Service
+    targetPort: 8080 # Port on the container to which traffic is forwarded
+
+---
+apiVersion: autoscaling/v1 # Defines the API version for HorizontalPodAutoscaler resource
+kind: HorizontalPodAutoscaler # The type of Kubernetes resource, here it's HorizontalPodAutoscaler
+metadata:
+  name: backend # Name of the HorizontalPodAutoscaler
+  namespace: expense # Namespace in which the HorizontalPodAutoscaler is created
+spec:
+  scaleTargetRef: # Reference to the Deployment to scale
+    apiVersion: apps/v1 # API version for the Deployment resource
+    kind: Deployment # The resource kind to scale (here it's a Deployment)
+    name: backend # Name of the Deployment to scale
+  minReplicas: 1 # Minimum number of replicas
+  maxReplicas: 10 # Maximum number of replicas
+  targetCPUUtilizationPercentage: 15 # Target CPU utilization percentage for scaling (usually 75 in a real environment)
