@@ -1,3 +1,12 @@
+apiVersion: v1 # Defines the API version for the Namespace resource
+kind: Namespace # The type of Kubernetes resource, here it's a Namespace
+metadata:
+  name: expense # Name of the namespace
+  labels:
+    project: expense # Label for associating the namespace with the 'expense' project
+    environment: dev # Label for specifying the environment as 'dev'
+
+---
 apiVersion: apps/v1 # Defines the API version for the Deployment resource
 kind: Deployment # The type of Kubernetes resource, here it's a Deployment
 metadata:
