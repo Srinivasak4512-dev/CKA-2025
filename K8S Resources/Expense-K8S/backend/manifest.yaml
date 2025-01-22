@@ -1,0 +1,53 @@
+apiVersion: apps/v1 # Defines the API version for the Deployment resource
+kind: Deployment # The type of Kubernetes resource, here it's a Deployment
+metadata:
+  name: mysql # Name of the Deployment
+  namespace: expense # Namespace in which the Deployment is created
+  labels:
+    app: mysql # Label for identifying the application as MySQL
+    tier: db # Label indicating this is the database tier
+    project: expense # Label to associate this Deployment with the 'expense' project
+spec:
+  replicas: 2 # Desired number of replicas (Pods) for the Deployment
+  selector:
+    matchLabels:
+      app: mysql # Selector to match Pods with the label 'app: mysql'
+      tier: db # Selector to match Pods with the label 'tier: db'
+      project: expense # Selector to match Pods with the label 'project: expense'
+  template:
+    metadata:
+      labels:
+        app: mysql # Labels applied to the Pods
+        tier: db # Labels applied to the Pods
+        project: expense # Labels applied to the Pods
+    spec:
+      containers:
+      - name: mysql # Name of the container
+        image: srinikysj4512/mysql:v1 # Docker image used for the container
+        readinessProbe: # Readiness probe to check if the container is ready
+          tcpSocket:
+            port: 3306 # Port on which the probe checks the container
+          initialDelaySeconds: 15 # Delay before the first readiness check
+          periodSeconds: 10 # Time interval between subsequent readiness checks
+        livenessProbe: # Liveness probe to check if the container is alive
+          tcpSocket:
+            port: 3306 # Port on which the probe checks the container
+          initialDelaySeconds: 15 # Delay before the first liveness check
+          periodSeconds: 10 # Time interval between subsequent liveness checks
+
+---
+kind: Service # Defines a Service resource to expose the MySQL Deployment
+apiVersion: v1 # API version for the Service resource
+metadata:
+  name: mysql # Name of the Service
+  namespace: expense # Namespace in which the Service is created
+spec:
+  selector:
+    app: mysql # Selector to match Pods with the label 'app: mysql'
+    tier: db # Selector to match Pods with the label 'tier: db'
+    project: expense # Selector to match Pods with the label 'project: expense'
+  ports:
+  - name: mysql-port # Name of the service port
+    protocol: TCP # Protocol used for communication (TCP for MySQL)
+    port: 3306 # Port exposed by the Service
+    targetPort: 3306 # Port on the container to which traffic is forwarded
